@@ -1,5 +1,5 @@
 blueprint:
-  name: SG Ready PV-Optimierung (mit Moduswahl, ohne EVU Sperre)
+  name: SG Ready PV optimization (with mode selection, without utility company lockout)
   description: >
     Controls SG0/SG1 depending on PV surplus and mode selection.
     In "Auto" mode, it operates according to PV logic; otherwise, it switches manually based on your selection.
