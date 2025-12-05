@@ -41,10 +41,10 @@
     name: SG Ready Modus
     options:
       - "Auto"
-      - "Normbetrieb"
-      - "PV-Optimierung"
+      - "Normal operation"
+      - "PV-Optimization"
       - "PV-Boost"
-      - "Netzsperre"
+      - "Network block"
     initial: "Auto"
     icon: mdi:heat-pump
 </code></pre>
