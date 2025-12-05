@@ -1,33 +1,33 @@
 blueprint:
   name: SG Ready PV-Optimierung (mit Moduswahl, ohne EVU Sperre)
   description: >
-    Steuert SG0/SG1 je nach PV-Überschuss und Modus-Auswahl.
-    Im Modus "Auto" nach PV-Logik, sonst wird nach deiner Auswahl hart geschaltet.
-    Die Moduswahl erfolgt über einen input_select (mit: Auto, Normbetrieb, PV-Optimierung, PV-Boost, Netzsperre).
+    Controls SG0/SG1 depending on PV surplus and mode selection.
+    In "Auto" mode, it operates according to PV logic; otherwise, it switches manually based on your selection.
+    Mode selection is made via an input select (with: Auto, Standard Operation, PV Optimization, PV Boost, Grid Lockout).
   domain: automation
   input:
     pv_sensor:
-      name: PV-Überschuss Sensor (Grid Power, negativ bei Einspeisung)
+      name: PV surplus sensor (Grid Power, negative reading when feeding into the grid)
       selector:
         entity:
           domain: sensor
     sg0_switch:
-      name: SG0 Ausgang
+      name: SG0 Output
       selector:
         entity:
           domain: switch
     sg1_switch:
-      name: SG1 Ausgang
+      name: SG1 Output
       selector:
         entity:
           domain: switch
     modus_select:
-      name: SG Ready Modus-Select (input_select)
+      name: SG Ready mode-Select (input_select)
       selector:
         entity:
           domain: input_select
     sg0_threshold:
-      name: SG0 Schaltschwelle (Watt, NEGATIV)
+      name: SG0 Switching treshold (Watt, NEGATIVE)
       default: -1000
       selector:
         number:
@@ -35,7 +35,7 @@ blueprint:
           max: 0
           step: 100
     sg1_threshold:
-      name: SG1 Schaltschwelle (Watt, NEGATIV)
+      name: SG1 Switching treshold (Watt, NEGATIVE)
       default: -3000
       selector:
         number:
@@ -43,7 +43,7 @@ blueprint:
           max: 0
           step: 100
     off_threshold:
-      name: Ausschalt-Schwelle (Watt, NEGATIV)
+      name: Switching treshold (Watt, NEGATIVE)
       default: -500
       selector:
         number:
@@ -51,7 +51,7 @@ blueprint:
           max: 0
           step: 100
     delay:
-      name: Schaltverzögerung (Sekunden)
+      name: Switching delay (seconds)
       default: 60
       selector:
         number:
@@ -86,13 +86,13 @@ trigger:
 
 action:
   - choose:
-      # Im Modus "Auto" nach PV schalten!
+      # Switch to PV mode in "Auto" mode!
       - conditions:
           - condition: state
             entity_id: !input modus_select
             state: "Auto"
         sequence:
-          # Beide Schwellen unterschritten: SG0 und SG1 AN
+          # Both thresholds undershot: SG0 and SG1 AN
           - choose:
               - conditions:
                   - condition: numeric_state
@@ -105,7 +105,7 @@ action:
                   - service: switch.turn_on
                     target:
                       entity_id: !input sg1_switch
-          # Nur SG0-Schwelle unterschritten: SG0 AN, SG1 AUS
+          # Only SG0 threshold crossed: SG0 ON, SG1 OFF
           - choose:
               - conditions:
                   - condition: numeric_state
@@ -119,7 +119,7 @@ action:
                   - service: switch.turn_off
                     target:
                       entity_id: !input sg1_switch
-          # Überschuss fast weg: beide AUS
+          # Surplus almost gone: both OFF
           - choose:
               - conditions:
                   - condition: numeric_state
@@ -133,41 +133,41 @@ action:
                     target:
                       entity_id: !input sg1_switch
 
-      # Bei manuellem Modus wird fest geschaltet (egal welcher):
+      # In manual mode, the switch is fixed (regardless of which one):
       - conditions:
           - condition: or
             conditions:
               - condition: state
                 entity_id: !input modus_select
-                state: "Normbetrieb"
+                state: "Normal operation"
               - condition: state
                 entity_id: !input modus_select
-                state: "PV-Optimierung"
+                state: "PV-PV optimization"
               - condition: state
                 entity_id: !input modus_select
                 state: "PV-Boost"
               - condition: state
                 entity_id: !input modus_select
-                state: "Netzsperre"
+                state: "Network block"
         sequence:
-          # Immer erst beide aus:
+          # Always turn both off first:
           - service: switch.turn_off
             target:
               entity_id: !input sg0_switch
           - service: switch.turn_off
             target:
               entity_id: !input sg1_switch
-          # Jetzt entsprechend Modus setzen:
+          # Now set the appropriate mode:
           - choose:
               - conditions:
                   - condition: state
                     entity_id: !input modus_select
-                    state: "Normbetrieb"
+                    state: "Normal operation"
                 sequence: []
               - conditions:
                   - condition: state
                     entity_id: !input modus_select
-                    state: "PV-Optimierung"
+                    state: "PV optimization"
                 sequence:
                   - service: switch.turn_on
                     target:
@@ -186,7 +186,7 @@ action:
               - conditions:
                   - condition: state
                     entity_id: !input modus_select
-                    state: "Netzsperre"
+                    state: "Network block"
                 sequence:
                   - service: switch.turn_on
                     target:
