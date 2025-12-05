@@ -21,7 +21,7 @@ blueprint:
       selector:
         entity:
           domain: switch
-    modus_select:
+    mode_select:
       name: SG Ready mode-Select (input_select)
       selector:
         entity:
@@ -63,7 +63,7 @@ mode: single
 
 trigger:
   - platform: state
-    entity_id: !input modus_select
+    entity_id: !input mode_select
 
   - platform: numeric_state
     entity_id: !input pv_sensor
@@ -89,7 +89,7 @@ action:
       # Switch to PV mode in "Auto" mode!
       - conditions:
           - condition: state
-            entity_id: !input modus_select
+            entity_id: !input mode_select
             state: "Auto"
         sequence:
           # Both thresholds undershot: SG0 and SG1 AN
@@ -138,16 +138,16 @@ action:
           - condition: or
             conditions:
               - condition: state
-                entity_id: !input modus_select
+                entity_id: !input mode_select
                 state: "Normal operation"
               - condition: state
-                entity_id: !input modus_select
+                entity_id: !input mode_select
                 state: "PV-PV optimization"
               - condition: state
-                entity_id: !input modus_select
+                entity_id: !input mode_select
                 state: "PV-Boost"
               - condition: state
-                entity_id: !input modus_select
+                entity_id: !input mode_select
                 state: "Network block"
         sequence:
           # Always turn both off first:
@@ -161,12 +161,12 @@ action:
           - choose:
               - conditions:
                   - condition: state
-                    entity_id: !input modus_select
+                    entity_id: !input mode_select
                     state: "Normal operation"
                 sequence: []
               - conditions:
                   - condition: state
-                    entity_id: !input modus_select
+                    entity_id: !input mode_select
                     state: "PV optimization"
                 sequence:
                   - service: switch.turn_on
@@ -174,7 +174,7 @@ action:
                       entity_id: !input sg0_switch
               - conditions:
                   - condition: state
-                    entity_id: !input modus_select
+                    entity_id: !input mode_select
                     state: "PV-Boost"
                 sequence:
                   - service: switch.turn_on
@@ -185,7 +185,7 @@ action:
                       entity_id: !input sg1_switch
               - conditions:
                   - condition: state
-                    entity_id: !input modus_select
+                    entity_id: !input mode_select
                     state: "Network block"
                 sequence:
                   - service: switch.turn_on
